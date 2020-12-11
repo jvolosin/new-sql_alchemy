@@ -11,7 +11,7 @@ from flask import Flask, jsonify
 #################################################
 # Database Setup
 #################################################
-engine = create_engine("sqlite:///titanic.sqlite")
+engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
 # reflect an existing database into a new model
 Base = automap_base()
@@ -19,7 +19,8 @@ Base = automap_base()
 Base.prepare(engine, reflect=True)
 
 # Save reference to the table
-Passenger = Base.classes.passenger
+Station = Base.classes.station
+Measurement = Base.classes.measurement
 
 #################################################
 # Flask Setup
@@ -32,23 +33,29 @@ app = Flask(__name__)
 #################################################
 
 @app.route("/")
-def welcome():
+def homepage():
     """List all available api routes."""
     return (
         f"Available Routes:<br/>"
-        f"/api/v1.0/names<br/>"
-        f"/api/v1.0/passengers"
+        f"/api/v1.0/temperature<br/>"
+        f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/precipitation<br/>"
+        f"/api/v1.0/pcrp/<start><br/>"
+        f"/api/v1.0/pcrp/<start>/<end><br/>"
     )
 
 
-@app.route("/api/v1.0/names")
-def names():
+@app.route("/api/v1.0/")
+def station():
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    """Return a list of all passenger names"""
-    # Query all passengers
-    results = session.query(Passenger.name).all()
+    # Reproduce the temperature query used in part 1. 
+    # Convert the results to a list of dictionaries using `date` as the key and `prcp` as the value.
+    
+    first_yr_avg_temp = session.query(func.avg(Measurement.tobs), Measurement.date),\
+        filter(func.strftime("%Y", Measurement.date) == "2010").\
+        group_by(Measurement.date).all()
 
     session.close()
 
