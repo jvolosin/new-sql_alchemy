@@ -45,7 +45,7 @@ def homepage():
     )
 
 
-@app.route("/api/v1.0/")
+@app.route("/api/v1.0/temperature")
 def station():
     # Create our session (link) from Python to the DB
     session = Session(engine)
@@ -59,20 +59,38 @@ def station():
 
     session.close()
 
-    # Convert list of tuples into normal list
-    all_names = list(np.ravel(results))
+    avg_temp = []
+    for result in first_yr_avg_temp:
+        temp_dict = {}
+        temp_dict["date"] = date
+        temp_dict["tobs"] = tobs
+        avg_temp.append(temp_dict)
+       
+    return jsonify(avg_temp)
 
-    return jsonify(all_names)
 
-
-@app.route("/api/v1.0/passengers")
+@app.route("/api/v1.0/stations")
 def passengers():
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    """Return a list of passenger data including the name, age, and sex of each passenger"""
-    # Query all passengers
-    results = session.query(Passenger.name, Passenger.age, Passenger.sex).all()
+    
+    # Reproduce the first station analysis query from part 1 (name, station, and observations). Convert the results to a list of dictionaries, where each returned value has its own dictionary.
+    #Each dictionary in the list should be formatted as followed: `{"Station Name": name, "Station": station, "Observations": obs_count}`
+    #Note - I was unable to get names, I kept getting an error saying it wasn't in measurement even though I was querying stations. I understand this will lower my grade
+
+    query_list = session.query(Station.station, func.count(Measurement.station)).\
+        group_by(Measurement.station).\
+        order_by(func.count(Measurement.station).desc()).all()
+    
+    station_analysis = []
+    for result in query_list
+        station_dict = {}
+        station_dict["Station"] = station
+        station_dict["Observations"] = obs_count
+        station_analysis.append(station_dict)
+       
+    return jsonify(station_analysis)
 
     session.close()
 
