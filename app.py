@@ -84,7 +84,7 @@ def stations():
         order_by(func.count(Measurement.station).desc()).all()
     
     station_analysis = []
-    for result in query_list
+    for result in query_list:
         station_dict = {}
         station_dict["Station"] = station
         station_dict["Observations"] = obs_count
@@ -108,7 +108,7 @@ def precipitation():
         filter(func.strftime("%Y", Measurement.date) == "2016").all()
     
     precip_analysis = []
-    for result in precip
+    for result in precip:
         precip_dict = {}
         precip_dict["Observations"] = observations
         precip_analysis.append(precip_dict)
@@ -124,22 +124,22 @@ def precipitation():
 
   #When given the start date only, calculate min, max, and avg for all dates greater than and equal to the start date.
 
-  #When given the start and the end date, calculate the min, avg, and max for dates between the start and end date inclusive.
   
   #Return a JSONified dictionary of min, max, and avg temperatures.
 	#Note, the result will be a single dictionary of the format: `{"min_temp": min_temp, "max_temp": max_temp, "avg_temp": avg_temp}`
 
-@app.route("/api/v1.0/pcrp/<start")
-def precipitation():
+@app.route("/api/v1.0/pcrp/<start>")
+def start():
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    start_date = session.query(Station.station, func.count(Measurement.station)).\
-        group_by(Measurement.station).\
-        order_by(func.count(Measurement.station).desc()).all()
+    start_date = session.query(func.min(Measurement.station), func.max(Measurement.station), func.avg(Measurement.station)).\
+        filter(func.strftime("%m/%d/%y", Measurement.date >= "1/1/2010")).\
+        group_by(Measurement.station).all()
+        
     
     start_precip_data = []
-    for result in start_date
+    for result in start_date:
         start_dict = {}
         start_dict["min_temp"] = min_temp
         start_dict["max_temp"] = max_temp
@@ -150,19 +150,22 @@ def precipitation():
 
     session.close()
 
+#When given the start and the end date, calculate the min, avg, and max for dates between the start and end date inclusive.
 
 
-@app.route("/api/v1.0/pcrp/<start>/<end")
-def precipitation():
+@app.route("/api/v1.0/pcrp/<start>/<end>")
+def startend():
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    start_end_date = session.query(Station.station, func.count(Measurement.station)).\
-        group_by(Measurement.station).\
-        order_by(func.count(Measurement.station).desc()).all()
+    start_end_date = session.query(func.min(Measurement.station), func.max(Measurement.station), func.avg(Measurement.station)).\
+        filter(func.strftime("%m/%d/%y", Measurement.date >= "1/1/2010")).\
+        filter(func.strftime("%m/%d/%y", Measurement.date <= "8/23/2017")).\
+        group_by(Measurement.station).all()
+        
     
     start_end_precip_data = []
-    for result in start_end_date
+    for result in start_end_date:
         start_end_dict = {}
         start_end_dict["min_temp"] = min_temp
         start_end_dict["max_temp"] = max_temp
