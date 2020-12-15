@@ -103,18 +103,17 @@ def precipitation():
     
     # Reproduce the precipitation query from the Station Analysis section of part 1. 
 
-    query_list = session.query(Station.station, func.count(Measurement.station)).\
-        group_by(Measurement.station).\
-        order_by(func.count(Measurement.station).desc()).all()
+    precip = session.query(Measurement.prcp).\
+        filter(Measurement.station == 'USC00519281').\
+        filter(func.strftime("%Y", Measurement.date) == "2016").all()
     
-    station_analysis = []
-    for result in query_list
-        station_dict = {}
-        station_dict["Station"] = station
-        station_dict["Observations"] = obs_count
-        station_analysis.append(station_dict)
+    precip_analysis = []
+    for result in precip
+        precip_dict = {}
+        precip_dict["Observations"] = observations
+        precip_analysis.append(precip_dict)
        
-    return jsonify(station_analysis)
+    return jsonify(precip_analysis)
 
     session.close()
 
